@@ -20,12 +20,12 @@ def load_data(filename):
             part_num += 1
             
         if parts:
-            st.info(f"Reconstructing {filename} from {len(parts)} parts... This may take a moment.")
+            print(f"Reconstructing {filename} from {len(parts)} parts... This may take a moment.")
             with open(filename, 'wb') as output_file:
                 for part in parts:
                     with open(part, 'rb') as part_file:
                         output_file.write(part_file.read())
-            st.success(f"Reconstructed {filename}")
+            print(f"Reconstructed {filename}")
         else:
             st.error(f"Error: {filename} not found. Please ensure all model files are present.")
             st.stop()
