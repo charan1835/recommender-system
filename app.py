@@ -7,10 +7,36 @@ import requests
 from sklearn.metrics.pairwise import cosine_similarity
 
 # ---------------- LOAD MODELS ----------------
-movies_tags = joblib.load("movies_tags.pkl")
-vectors = joblib.load("vectors.pkl")
-similarity = joblib.load("similarity.pkl")
-cv = joblib.load("vectorizer.pkl")
+import os
+
+@st.cache_resource
+def load_data(filename):
+    if not os.path.exists(filename):
+        # Check if split parts exist
+        part_num = 0
+        parts = []
+        while os.path.exists(f"{filename}.part{part_num}"):
+            parts.append(f"{filename}.part{part_num}")
+            part_num += 1
+            
+        if parts:
+            st.info(f"Reconstructing {filename} from {len(parts)} parts... This may take a moment.")
+            with open(filename, 'wb') as output_file:
+                for part in parts:
+                    with open(part, 'rb') as part_file:
+                        output_file.write(part_file.read())
+            st.success(f"Reconstructed {filename}")
+        else:
+            st.error(f"Error: {filename} not found. Please ensure all model files are present.")
+            st.stop()
+            return None
+            
+    return joblib.load(filename)
+
+movies_tags = load_data("movies_tags.pkl")
+vectors = load_data("vectors.pkl")
+similarity = load_data("similarity.pkl")
+cv = load_data("vectorizer.pkl")
 
 # ---------------- CONSTANTS ----------------
 TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
