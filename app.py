@@ -181,39 +181,46 @@ def recommend_cold(description, genres, mood=None):
     return final_recs
 
 # ---------------- STREAMLIT UI ----------------
-st.set_page_config(page_title="Movie Recommender", layout="wide")
+st.set_page_config(page_title="Movie Recommender", page_icon="🎬", layout="wide")
 
 st.title("🎬 Movie Recommendation System")
+st.markdown("##### Discover your next favorite movie using AI 🍿")
 
-mode = st.radio(
+st.sidebar.title("🧭 Navigation")
+mode = st.sidebar.radio(
     "Choose recommendation mode:",
-    ["Existing Movie", "New Movie (Cold Start)"]
+    ["🍿 Existing Movie", "✨ New Movie (Cold Start)"]
 )
+
+st.sidebar.divider()
+st.sidebar.info("💡 **Tip:** Use the **Cold Start** mode to describe an idea you have in mind and let the AI find the closest matches!")
 
 st.divider()
 
-if mode == "Existing Movie":
+if mode == "🍿 Existing Movie":
     st.subheader("Search for a movie")
     
     # Examples
     st.write("Try these examples:")
     c1, c2, c3, c4 = st.columns(4)
-    if c1.button("Inception"): st.session_state.existing_query = "Inception"
-    if c2.button("Toy Story"): st.session_state.existing_query = "Toy Story"
-    if c3.button("Interstellar"): st.session_state.existing_query = "Interstellar"
-    if c4.button("Titanic"): st.session_state.existing_query = "Titanic"
+    if c1.button("Inception", use_container_width=True): st.session_state.existing_query = "Inception"
+    if c2.button("Toy Story", use_container_width=True): st.session_state.existing_query = "Toy Story"
+    if c3.button("Interstellar", use_container_width=True): st.session_state.existing_query = "Interstellar"
+    if c4.button("Titanic", use_container_width=True): st.session_state.existing_query = "Titanic"
 
-    movie_name = st.text_input("Enter movie name:", key="existing_query")
+    st.markdown("<br>", unsafe_allow_html=True)
+    movie_name = st.text_input("Enter movie name:", key="existing_query", placeholder="e.g. The Matrix")
 
-    if st.button("Recommend"):
-        movie = find_movie(movie_name)
-        if movie is None:
-            st.error("Movie not found in dataset.")
-        else:
-            st.success(f"Selected: **{movie}**")
-            st.subheader("Because you watched this:")
-            
-            results = recommend_existing(movie)
+    if st.button("Recommend", type="primary"):
+        with st.spinner("Finding best matches..."):
+            movie = find_movie(movie_name)
+            if movie is None:
+                st.error("Movie not found in dataset. Please try another one.")
+            else:
+                st.success(f"Selected: **{movie}**")
+                st.subheader("Because you watched this:")
+                
+                results = recommend_existing(movie)
             
             for title, score, explanation in results:
                 details = fetch_movie_details(title)
@@ -243,13 +250,13 @@ else:
     if "genre_input" not in st.session_state: st.session_state.genre_input = ""
     if "mood_input" not in st.session_state: st.session_state.mood_input = "None"
 
-    if ex_c1.button("🚀 Cyberpunk Detective"):
+    if ex_c1.button("🚀 Cyberpunk Detective", use_container_width=True):
         st.session_state.desc_input = "A detective hunting androids in a neon city future with flying cars."
         st.session_state.genre_input = "science fiction mystery"
         st.session_state.mood_input = "Dark & Gritty"
         st.rerun()
         
-    if ex_c2.button("🏰 Epic Fantasy Quest"):
+    if ex_c2.button("🏰 Epic Fantasy Quest", use_container_width=True):
         st.session_state.desc_input = "A group of heroes goes on a journey to save the kingdom from a dragon."
         st.session_state.genre_input = "fantasy adventure"
         st.session_state.mood_input = "Adrenaline"
@@ -280,10 +287,11 @@ else:
         if description.strip() == "":
             st.error("Please enter a description.")
         else:
-            mood_val = mood if mood != "None" else None
-            
-            st.subheader(f"Recommendations matching your vibe:")
-            results = recommend_cold(description, genres, mood_val)
+            with st.spinner("Analyzing your vibe and generating recommendations..."):
+                mood_val = mood if mood != "None" else None
+                
+                st.subheader("Here are your recommendations:")
+                results = recommend_cold(description, genres, mood_val)
             
             # Display in a grid
             for title, score, explanation in results:
