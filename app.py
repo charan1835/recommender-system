@@ -309,3 +309,7 @@ else:
                             
                         if explanation:
                             st.write(f"💡 **Matches:** {', '.join(explanation)}")
+
+# Footer
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: gray;'>Designed with ❤️ using Space Algorithm and Streamlit</p>", unsafe_allow_html=True)
